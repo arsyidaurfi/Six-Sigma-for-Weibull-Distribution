@@ -1,0 +1,65 @@
+#Import data cacat
+data=read.csv(file.choose())
+View(data)
+
+#Checking Weibull Distribution
+library(goft)
+weibull_test(data$data_cacat)
+param_Weibull=fitdistr(data$data_cacat,"weibull")
+
+#Centered Weibull
+#Data Weibull dengan shape 2.141 dan scale 48.602
+shape= 2.141
+scale= 48.602
+mean.Weibull=mean(data$data_cacat)
+var.Weibull=var(data$data_cacat)
+std.Weibull=sqrt(var.Weibull)
+totalcacat=sum(data$data_cacat)
+totalproduksi=sum(data$total_produksi)
+DPMO=(totalcacat/totalproduksi)*10^6
+DPMO
+
+#Mencari Level Sigma
+a=DPMO*10^-6
+a1=a/2
+a2=a1
+wac1=qweibull(a1,shape,scale)
+wac2=qweibull(a2,shape,scale,lower.tail=FALSE)
+Kc1=(miu-wac1)/std.Weibull
+Kc2=(wac2-miu)/std.Weibull
+AverageSQL=(Kc1+Kc2)/2
+AverageSQL
+
+#KurvaWeibull
+sortdata=sort(data$data_cacat)
+ft <- dweibull(sortdata, shape, scale)
+plot(sortdata, ft, type="l", lty=1, lwd=2, 
+     col="blue",
+     xlab="Data",
+     ylab="Density", 
+     main="Kurva Weibull of Cacat Produk (Centered)")
+
+
+#Right Shifted Weibull
+xbar=mean.Weibull+(1.5*std.Weibull)
+shape_rs=(std.Weibull/xbar)^-1.086
+scale_rs=xbar/(gamma(1+(1/shape_rs)))
+a1aksen=pweibull(wac1,shape_rs,scale_rs)
+a2aksen=pweibull(wac2,shape_rs,scale_rs,lower.tail=FALSE)
+Ks1=(xbar-wac1)/std.Weibull
+Ks2=(wac2-xbar)/std.Weibull
+AverageSQL=(Ks1+Ks2)/2
+AverageSQL
+
+#Mencari DPMO
+aaksen=a1aksen+a2aksen
+DPMO_rs=aaksen*10^6
+DPMO_rs
+
+#KurvaWeibullRightShifted
+ft <- dweibull(sortdata, shape_rs, scale_rs)
+plot(sortdata, ft, type="l", lty=1, lwd=2, 
+     col="blue",
+     xlab="Data",
+     ylab="Density", 
+     main="Kurva Weibull of Cacat Produk (Right Shifted)")
